@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>M_R_12</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      color: #00ff00;
+      font-family: 'SF Pro Display', 'Helvetica Neue', 'Roboto Mono', monospace;
+      overflow-y: auto;
+      padding-bottom: 50px;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      padding: 80px 20px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 3.5rem;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+
+    p {
+      font-size: 1.1rem;
+      opacity: 0.85;
+      max-width: 800px;
+      margin: 20px auto;
+    }
+
+    iframe {
+      margin-top: 30px;
+      width: 90%;
+      max-width: 700px;
+      height: 400px;
+      border: 3px solid #00ff00;
+      border-radius: 12px;
+      box-shadow: 0 0 20px #00ff00;
+    }
+
+    .channel-button {
+      display: inline-block;
+      padding: 12px 30px;
+      margin-top: 20px;
+      background-color: #00ff00;
+      color: black;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .channel-button:hover {
+      background-color: #00cc00;
+      transform: scale(1.1);
+    }
+
+    .admin-panel {
+      display: none;
+      background-color: rgba(0, 0, 0, 0.75);
+      border: 1px solid #00ff00;
+      padding: 30px;
+      border-radius: 20px;
+      max-width: 700px;
+      margin: 30px auto;
+      text-align: left;
+      box-shadow: 0 0 20px #00ff00aa;
+    }
+
+    .admin-panel h2 {
+      color: #00ff00;
+    }
+
+    .admin-panel label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    .admin-panel input,
+    .admin-panel textarea {
+      width: 100%;
+      background: black;
+      color: #00ff00;
+      border: 1px solid #00ff00;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 5px;
+      font-family: monospace;
+    }
+
+    .admin-panel button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #00ff00;
+      color: black;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+
+    .admin-panel button:hover {
+      background: #00cc00;
+    }
+
+    .secret-hint {
+      position: fixed;
+      bottom: 10px;
+      right: 20px;
+      font-size: 10px;
+      opacity: 0.2;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: #00ff00;
+      font-size: 0.9rem;
+      position: relative;
+      bottom: 0;
+      width: 100%;
+    }
+
+    footer a {
+      text-decoration: none;
+      color: #00ff00;
+      font-weight: bold;
+    }
+
+  </style>
+</head>
+<body>
+  <canvas id="matrix"></canvas>
+
+  <div class="container">
+    <h1 id="siteTitle" onclick="toggleAdminPanel()">🎧 M_R_12</h1>
+    <p id="siteDescription">
+      M_R_12 is the evolution of digital expression — a space where music, visuals, and technology collide. This is our channel’s central node, where ideas go live and fans connect directly to the source. Built like a mainframe, this portal holds the pulse of Moon Records 2012. From every glitchy beat to every frame of sound, M_R_12 is the core of what we create. Tap in, dive deep, and reshape your reality with us.
+    </p>
+
+    <iframe id="latestVideo" src="" frameborder="0" allowfullscreen></iframe>
+
+    <br />
+    <a href="https://www.youtube.com/@Moon_records_2012" target="_blank">
+      <button class="channel-button">🌙 Visit M_R_12 Channel</button>
+    </a>
+
+    <div id="adminPanel" class="admin-panel">
+      <h2>🛠️ M_R_12 Console</h2>
+
+      <label for="titleInput">Edit Page Title</label>
+      <input type="text" id="titleInput" placeholder="Enter new title">
+
+      <label for="descInput">Edit Description</label>
+      <textarea id="descInput" rows="6" placeholder="Enter new description"></textarea>
+
+      <label for="colorInput">Matrix Color (Hex Code)</label>
+      <input type="text" id="colorInput" placeholder="#00ff00">
+
+      <button onclick="applyChanges()">Apply Changes</button>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2025 <a href="https://www.youtube.com/@Moon_records_2012" target="_blank">Moon Records</a>. All Rights Reserved.
+  </footer>
+
+  <div class="secret-hint">[click the title]</div>
+
+  <script>
+    // Matrix Animation
+    const canvas = document.getElementById('matrix');
+    const ctx = canvas.getContext('2d');
+
+    canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
+
+    const matrixText = "アァイィウヴエカガキギクグケコゴABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%";
+    const letters = matrixText.split("");
+
+    let fontSize = 14;
+    let columns = canvas.width / fontSize;
+    let drops = Array(Math.floor(columns)).fill(1);
+    let matrixColor = "#00ff00";
+
+    function draw() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = matrixColor;
+      ctx.font = fontSize + "px monospace";
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = letters[Math.floor(Math.random() * letters.length)];
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+
+        drops[i]++;
+      }
+    }
+
+    setInterval(draw, 33);
+
+    window.addEventListener('resize', () => {
+      canvas.height = window.innerHeight;
+      canvas.width = window.innerWidth;
+    });
+
+    // Admin Panel Toggle
+    function toggleAdminPanel() {
+      const panel = document.getElementById('adminPanel');
+      panel.style.display = panel.style.display === 'none' || panel.style.display === '' ? 'block' : 'none';
+    }
+
+    // Apply Admin Changes
+    function applyChanges() {
+      const newTitle = document.getElementById('titleInput').value;
+      const newDesc = document.getElementById('descInput').value;
+      const newColor = document.getElementById('colorInput').value;
+
+      if (newTitle) {
+        document.getElementById('siteTitle').innerText = newTitle;
+      }
+
+      if (newDesc) {
+        document.getElementById('siteDescription').innerText = newDesc;
+      }
+
+      if (/^#[0-9A-Fa-f]{6}$/.test(newColor)) {
+        matrixColor = newColor;
+      } else if (newColor) {
+        alert("Please enter a valid hex color code like #00ff00.");
+      }
+    }
+
+    // Fetch the latest long video from YouTube API
+    async function fetchLatestVideo() {
+      const apiKey = 'AIzaSyARAJoo_I2JY_dPJ094ndhQcy2XB1Mxvy0';  // Your API key
+      const channelId = 'UC5To393Mw8roNQbW8N6aI5g'; // Your YouTube Channel ID
+      const url = `https://www.googleapis.com/youtube/v3/search?key=${apiKey}&channelId=${channelId}&order=date&part=snippet&type=video`;
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        for (let video of data.items) {
+          const videoId = video.id.videoId;
+          const videoDetails = await fetch(`https://www.googleapis.com/youtube/v3/videos?key=${apiKey}&id=${videoId}&part=contentDetails`);
+          const videoDetailsData = await videoDetails.json();
+          
+          // Checking the duration of the video
+          const duration = videoDetailsData.items[0].contentDetails.duration;
+
+          // Filtering out Shorts by checking if the video is less than or equal to 60 seconds
+          const timeRegex = /PT(\d+)S/;
+          const match = timeRegex.exec(duration);
+          if (match && parseInt(match[1]) <= 60) {
+            // Skip this video as it's a short
+            continue;
+          }
+
+          // Update the iframe with the latest valid video
+          document.getElementById('latestVideo').src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+          break; // Only show the first valid video
+        }
+      } catch (error) {
+        console.error('Error fetching YouTube data:', error);
+      }
+    }
+
+    // Call the function to fetch and display the latest video when the page loads
+    window.onload = fetchLatestVideo;
+
+  </script>
+</body>
+</html>
